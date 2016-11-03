@@ -20,23 +20,23 @@ than a minute per-sample to re-estimate transcript abundances while accounting f
 Shoal requires to have salmon output from version --: xx
 
 * clone shoal into your local machine:
-```
+```bash
 git clone https://github.com/COMBINE-lab/shoal.git
 ```
 
 * change current working directory to shoal and make folder with name `quant` inside it
-```
+```bash
 cd shoal; mkdir quant;
 ```
 
 * move the salmon output ***directory*** of all the samples in the experiment into the `quant` directory
-```
+```bash
 mv ~/ConA* quant/
 mv ~/ConB* quant/
 ```
 
 * run shell script
-```
+```bash
 ./run_shoal.sh
 ```
 NOTE: shell script can be given executable permission with command: ```chmod +x run_shoal.sh```
