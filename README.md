@@ -13,7 +13,7 @@ expectation maximization algorithm to apply this prior adaptively across multi-m
 of reads.  
 shoal can increase quantification accuracy, inter- sample consistency, and reduce false positives in 
 downstream differential analysis when applied to multi-condition RNA-seq experiments. 
-Moreover, shoal, runs downstream of Salmon(switchable to other quantification tools too) and requires less 
+Moreover, shoal, runs downstream of Salmon and requires less 
 than a minute per-sample to re-estimate transcript abundances while accounting for the learned empirical prior.
 
 ### Using shoal
@@ -32,7 +32,7 @@ cd shoal; mkdir quant;
 * move the salmon output ***directory*** of all the samples in the experiment into the `quant` directory
 ```
 mv ~/ConA* quant/
-mc ~/ConB* quant/
+mv ~/ConB* quant/
 ```
 
 * run shell script
