@@ -17,29 +17,25 @@ Moreover, shoal, runs downstream of Salmon and requires less
 than a minute per-sample to re-estimate transcript abundances while accounting for the learned empirical prior.
 
 ### Using shoal
-Shoal requires to have salmon output from version --: xx
+Shoal requires to have salmon output of all the samples in the experiment
+separately using Salmon version --: xx
 
 * clone shoal into your local machine:
 ```bash
 git clone https://github.com/COMBINE-lab/shoal.git
 ```
 
-* change current working directory to shoal and make folder with name `quant` inside it
+* run shoal:
 ```bash
-cd shoal; mkdir quant;
-```
-
-* move the salmon output ***directory*** of all the samples in the experiment into the `quant` directory
-```bash
-mv ~/ConA* quant/
-mv ~/ConB* quant/
-```
-
-* run shell script
-```bash
-./run_shoal.sh
+./run_shoal.sh -q <salmon_quant_directory_path> -o <output_directory_path>
 ```
 NOTE: shell script can be given executable permission with command: ```chmod +x run_shoal.sh```
+
+* shoal output:
+-- shoal generates `.sf` for each sample in the experiment with naming convention as follows:
+```bash
+<output_directoty>/<sample_name>_adapt.sf
+```
 
 Footnotes:
 ----------
