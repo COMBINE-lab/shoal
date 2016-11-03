@@ -31,8 +31,8 @@ git clone https://github.com/COMBINE-lab/shoal.git
 ```
 NOTE: shell script can be given executable permission with command: ```chmod +x run_shoal.sh```
 
-* shoal output:
--- shoal generates `.sf` for each sample in the experiment with naming convention as follows:
+* shoal output:  
+-- shoal generates `.sf` files for each sample in the experiment with naming convention as follows:
 ```bash
 <output_directoty>/<sample_name>_adapt.sf
 ```
