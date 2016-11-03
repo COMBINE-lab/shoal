@@ -21,7 +21,7 @@ git clone https://github.com/COMBINE-lab/shoal.git
 cd shoal; mkdir quant;
 ```
 
-* move the salmon output **directory** of all the samples in the experiment into the `quant` directory
+* move the salmon output ***directory*** of all the samples in the experiment into the `quant` directory
 ```
 mv ~/ConA* quant/
 mc ~/ConB* quant/
