@@ -5,18 +5,18 @@ Improved multi-sample transcript abundance estimates using adaptive priors
 ![A shoal](https://upload.wikimedia.org/wikipedia/commons/b/b1/School_jacks_klein.JPG)<sup id="a1">[1](#f1)</sup>
 
 
-# What is shoal?
+### What is shoal?
 shoal is a tool which jointly quantify transcript abundances across multiple samples.
 Specifically, shoal learns an empirical prior on transcript-level abundances across all of the 
 samples in an experiment, and subsequently applies a variant of the variational Bayesian 
 expectation maximization algorithm to apply this prior adaptively across multi-mapping groups 
-of reads.
+of reads.  
 shoal can increase quantification accuracy, inter- sample consistency, and reduce false positives in 
 downstream differential analysis when applied to multi-condition RNA-seq experiments. 
 Moreover, shoal, runs downstream of Salmon(switchable to other quantification tools too) and requires less 
 than a minute per-sample to re-estimate transcript abundances while accounting for the learned empirical prior.
 
-# Using shoal
+### Using shoal
 Shoal requires to have salmon output from version --: xx
 
 * clone shoal into your local machine:
