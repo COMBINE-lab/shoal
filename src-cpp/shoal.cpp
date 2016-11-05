@@ -269,7 +269,7 @@ int main(int argc, char* argv[]) {
   Value<std::string> sampleOpt("s", "sample", "file containing quantifications",
                                "", &sampleDir);
   Value<std::string> outOpt("o", "output", "output file", "", &outFile);
-  Value<double> weightOpt("w", "weight", "informative prior weight", 0.05,
+  Value<double> weightOpt("w", "weight", "informative prior weight", 0.001,
                           &weight);
 
   OptionParser op("Options");
