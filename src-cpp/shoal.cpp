@@ -92,7 +92,7 @@ Eigen::VectorXd optAdaptEst(EquivCollection& ec, spp::sparse_hash_map<std::strin
     Eigen::VectorXd alphaOptInform;
     alphaOptInform = opt.optimize(ec, alphas, lengths, effLens, priorInform, prior, factorsInform, estCounts, OptimizationType::VBEM);
     auto alphaOpt = opt.optimize(ec, alphas, lengths, effLens, prior, prior, factors, estCounts, OptimizationType::VBEM);
-    
+
     Eigen::VectorXd merged(N);
     for (size_t i = 0; i < N; ++i) {
         auto& priorEnt = priorMap[ec.tnames_[i]];
@@ -101,7 +101,7 @@ Eigen::VectorXd optAdaptEst(EquivCollection& ec, spp::sparse_hash_map<std::strin
     Eigen::VectorXd mergedOut(N); mergedOut.setZero();
     EMUpdate_(ec.labels_, ec.auxProbs_, ec.counts_, merged, mergedOut);
     truncateCountVector(merged, 1e-8);
-    return mergedOut; 
+    return mergedOut;
 }
 
 
@@ -140,7 +140,7 @@ Eigen::VectorXd optAdaptPrior(EquivCollection& ec, spp::sparse_hash_map<std::str
         lengths[i] = static_cast<double>(quantEnt.len);
         effLens[i] = quantEnt.efflen;
         estCounts[i] += 1e-3 * effLens[i];//quantEnt.numReads;
-        alphas[i] = 1.0/N;//estCounts[i]; 
+        alphas[i] = 1.0/N;//estCounts[i];
         auto& priorEnt = priorMap[tname];
         factors[i] = priorEnt.factor;
         ++i;
@@ -183,14 +183,14 @@ Eigen::VectorXd optAdaptPrior(EquivCollection& ec, spp::sparse_hash_map<std::str
     //fsr.close();
     //fsf.close();
     //fsi.close();
-    
+
     console->info("flatSum = {}, infoSum = {}, ratio = {}", flatSum, infoSum, flatSum / infoSum);
     console->info("num txps = {}", priorMap.size());
     auto autoWeight = 0.15 * (flatSum / infoSum);
     //autoWeight = (flatSum / infoSum);
     //autoWeight = 1.0;//mf / mi;
 
-    
+
     //double dfact = 0.1;
     //std::nth_element(ratios.begin(), ratios.begin() + (dfact * ratios.size()), ratios.end());
     //autoWeight = ratios[(dfact * ratios.size())];
@@ -259,10 +259,10 @@ int main(int argc, char* argv[]) {
   std::string sampleDir;
   std::string outFile;
   std::string optStr;
-  double weight{0.05};
+  double weight{0.001};
 
   Switch helpOption("h", "help", "produce help message");
-  Value<std::string> optType("t", "optType", "The type of optimization to perform one of {adapt-prior, or adapt-est}", 
+  Value<std::string> optType("t", "optType", "The type of optimization to perform one of {adapt-prior, or adapt-est}",
                              "adapt-prior", &optStr);
   Value<std::string> priorOpt("p", "prior", "file containing prior", "",
                               &priorFile);
@@ -289,7 +289,7 @@ int main(int argc, char* argv[]) {
       std::cout << op << "\n";
       std::exit(0);
     }
-    
+
     std::unordered_set<std::string> validOptTypes = {"adapt-prior", "adapt-est"};
     if (validOptTypes.find(optStr) == validOptTypes.end()) {
         console->critical("Do not recognize optType {}!", optStr);
@@ -317,6 +317,11 @@ int main(int argc, char* argv[]) {
     }
 
     std::string eqFile = sampleDir + "/aux_info/eq_classes.txt";
+    if (!filesystem::path(eqFile).exists()){
+        console->critical("Could not find the \"eq_classes.txt\" file."
+                        "Make sure you ran right version of salmon");
+        std::exit(0);
+    }
     EquivCollection ec;
     ec.fromFile(eqFile);
     console->info("num txp names = {}", ec.tnames_.size());
@@ -368,7 +373,7 @@ int main(int argc, char* argv[]) {
     } else {
         merged = optNoPrior(ec, quantMap, weight);
     }
-    
+
     writeSFFile(outFile, ec.tnames_, merged, lengths, effLens);
     // Release and close all loggers
     spdlog::drop_all();
