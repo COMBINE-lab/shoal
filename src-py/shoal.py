@@ -1,10 +1,9 @@
 import os
 import sys
-import vbem
 import pandas as pd
 import numpy as np
 import logging
-import eqtools
+#import equiv_class_tools
 from readBootstraps import getBootstraps
 
 sep = os.path.sep
@@ -167,75 +166,75 @@ def createPrior(args):
     d.to_csv(outdir + '/prior.tsv', sep='\t')
 
 
-def VBEMcaller(args):
-    '''
-    quantification output file and equivalence class file parsing code, and calling vbem module
-    some part from RapClust https://github.com/COMBINE-lab/RapClust/blob/master/bin/RapClust
-    input:
-        sampleDirs: path to the directory of the samples
-    output:
-        alphas: estimated counts after VBEM optimization
-    '''
-    # Create a logger object.
-    import logging
-    logger = logging.getLogger('shoal')
-
-    # Initialize coloredlogs.
-    import coloredlogs
-    coloredlogs.install(level='DEBUG')
-
-    weight = float(args.weight)
-    sep = os.path.sep
-
-    # A list of all sample directories
-    sd = sep.join([args.basepath, 'salmonData', 'quant', args.sample])
-    outdir = args.outdir
-
-    if os.path.exists(outdir):
-        if not os.path.isdir(outdir):
-            print("The output directory already exists, and is not a directory!")
-            sys.exit(1)
-    else:
-        # create it
-        os.makedirs(outdir)
-
-    eqfile = sep.join([sd, 'aux_info', 'eq_classes.txt'])
-    quantfile = sep.join([sd, 'quant.sf'])
-
-    eqCollection = eqtools.EquivCollection(True)
-    eqCollection.fromFile(eqfile)
-    logger.info("Imported file: {}; # eq = {}".format(eqfile, len(eqCollection.eqClasses)))
-
-    priorTable = pd.read_table(args.prior).set_index('Name')
-    inputTable = pd.read_table(quantfile).set_index('Name')
-
-    prior = []
-    alphasIn = []
-    tnames = eqCollection.tnames
-    effLens = np.array(inputTable.loc[tnames,'EffectiveLength'].values)
-    flatPrior = 1e-3 * np.array(inputTable.loc[tnames, 'EffectiveLength'].values)
-    alphas = np.array(inputTable.loc[tnames, 'NumReads'].values)
-    factors = np.array(priorTable.loc[tnames, 'factor'].values)
-    means = np.array(priorTable.loc[tnames, 'mean'].values)
-    prior = flatPrior #+ ((1.0 - factors) * (weight * means))
-    alphasIn = alphas
-    logger.info(prior)
-    #for txp in tqdm(eqCollection.tnames):
-    #    flatPrior = 1e-3 * inputTable.loc[txp, 'EffectiveLength']
-    #    factor = priorTable.loc[txp, 'factor']
-    #    mean = priorTable.loc[txp, 'mean']
-    #    alpha = inputTable.loc[txp, 'NumReads']
-    #    prior.append((factor * flatPrior) + (1.0 - factor) * (weight * mean))
-    #    alphasIn.append(alpha)
-
-    print ("All files imported; Starting VBEM")
-    alphasOut = vbem.runVBEM(np.array(alphasIn), effLens, eqCollection.auxDict, eqCollection.eqClasses, np.array(prior))
-    print ("Optimization Complete; Dumping output")
-    vbem.dumpSFfile(sep.join([outdir, sd.split(sep)[-1]+'_{}.sf'.format(weight)]),
-                    eqCollection.tnames,
-                    inputTable['Length'].to_dict(),
-                    inputTable['EffectiveLength'].to_dict(),#txpLength,
-                    alphasOut)
+#def VBEMcaller(args):
+#    '''
+#    quantification output file and equivalence class file parsing code, and calling vbem module
+#    some part from RapClust https://github.com/COMBINE-lab/RapClust/blob/master/bin/RapClust
+#    input:
+#        sampleDirs: path to the directory of the samples
+#    output:
+#        alphas: estimated counts after VBEM optimization
+#    '''
+#    # Create a logger object.
+#    import logging
+#    logger = logging.getLogger('shoal')
+#
+#    # Initialize coloredlogs.
+#    import coloredlogs
+#    coloredlogs.install(level='DEBUG')
+#
+#    weight = float(args.weight)
+#    sep = os.path.sep
+#
+#    # A list of all sample directories
+#    sd = sep.join([args.basepath, 'salmonData', 'quant', args.sample])
+#    outdir = args.outdir
+#
+#    if os.path.exists(outdir):
+#        if not os.path.isdir(outdir):
+#            print("The output directory already exists, and is not a directory!")
+#            sys.exit(1)
+#    else:
+#        # create it
+#        os.makedirs(outdir)
+#
+#    eqfile = sep.join([sd, 'aux_info', 'eq_classes.txt'])
+#    quantfile = sep.join([sd, 'quant.sf'])
+#
+#    eqCollection = eqtools.EquivCollection(True)
+#    eqCollection.fromFile(eqfile)
+#    logger.info("Imported file: {}; # eq = {}".format(eqfile, len(eqCollection.eqClasses)))
+#
+#    priorTable = pd.read_table(args.prior).set_index('Name')
+#    inputTable = pd.read_table(quantfile).set_index('Name')
+#
+#    prior = []
+#    alphasIn = []
+#    tnames = eqCollection.tnames
+#    effLens = np.array(inputTable.loc[tnames,'EffectiveLength'].values)
+#    flatPrior = 1e-3 * np.array(inputTable.loc[tnames, 'EffectiveLength'].values)
+#    alphas = np.array(inputTable.loc[tnames, 'NumReads'].values)
+#    factors = np.array(priorTable.loc[tnames, 'factor'].values)
+#    means = np.array(priorTable.loc[tnames, 'mean'].values)
+#    prior = flatPrior #+ ((1.0 - factors) * (weight * means))
+#    alphasIn = alphas
+#    logger.info(prior)
+#    #for txp in tqdm(eqCollection.tnames):
+#    #    flatPrior = 1e-3 * inputTable.loc[txp, 'EffectiveLength']
+#    #    factor = priorTable.loc[txp, 'factor']
+#    #    mean = priorTable.loc[txp, 'mean']
+#    #    alpha = inputTable.loc[txp, 'NumReads']
+#    #    prior.append((factor * flatPrior) + (1.0 - factor) * (weight * mean))
+#    #    alphasIn.append(alpha)
+#
+#    print ("All files imported; Starting VBEM")
+#    alphasOut = vbem.runVBEM(np.array(alphasIn), effLens, eqCollection.auxDict, eqCollection.eqClasses, np.array(prior))
+#    print ("Optimization Complete; Dumping output")
+#    vbem.dumpSFfile(sep.join([outdir, sd.split(sep)[-1]+'_{}.sf'.format(weight)]),
+#                    eqCollection.tnames,
+#                    inputTable['Length'].to_dict(),
+#                    inputTable['EffectiveLength'].to_dict(),#txpLength,
+#                    alphasOut)
 
 if __name__ == "__main__":
     import argparse
@@ -249,14 +248,13 @@ if __name__ == "__main__":
     parserCreatePrior.add_argument('--outdir', help="Location where the prior should be written")
     parserCreatePrior.set_defaults(func=createPrior)
 
-    parserEstimate= subparsers.add_parser('estimate', help='estimate abundance')
-    parserEstimate.add_argument('--sample', help="A single sample on which to run the VBEM")
-    parserEstimate.add_argument('--basepath', help="Path where the yaml file resides")
-    parserEstimate.add_argument('--outdir', help="Path to output abundance estimate")
-    parserEstimate.add_argument('--weight', help="weight of the prior")
-    parserEstimate.add_argument('--prior', help="Path to prior file")
-    parserEstimate.set_defaults(func=VBEMcaller)
+    #parserEstimate= subparsers.add_parser('estimate', help='estimate abundance')
+    #parserEstimate.add_argument('--sample', help="A single sample on which to run the VBEM")
+    #parserEstimate.add_argument('--basepath', help="Path where the yaml file resides")
+    #parserEstimate.add_argument('--outdir', help="Path to output abundance estimate")
+    #parserEstimate.add_argument('--weight', help="weight of the prior")
+    #parserEstimate.add_argument('--prior', help="Path to prior file")
+    #parserEstimate.set_defaults(func=VBEMcaller)
 
     args = parser.parse_args()
     args.func(args)
-    print(args)
