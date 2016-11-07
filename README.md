@@ -21,7 +21,7 @@ shoal is designed and developed by [Avi Srivastava](https://github.com/k3yavi), 
 
 ### Using shoal
 Shoal requires to have salmon output of all the samples in the experiment
-separately using the latest version of Salmon (from the [develop branch of the Salmon repo](https://github.com/COMBINE-lab/salmon/tree/develop); a tagged release and pre-compiled binary will be made available soon).  Please run Salmon with the `--dumpEqWeights` option, which will produce output suitable for shoal.
+separately using the latest version of Salmon (either built from the [develop branch of the Salmon repo](https://github.com/COMBINE-lab/salmon/tree/develop); or, you can grab a [pre-compiled binary for Linux from here](https://drive.google.com/file/d/0B3iS9-xjPftjaVVacUV1VWxsWlE/view?usp=sharing)).  Please run Salmon with the `--dumpEqWeights` option, which will produce output suitable for shoal.
 
 * clone shoal into your local machine:
 ```bash
