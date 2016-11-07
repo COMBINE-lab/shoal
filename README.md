@@ -11,10 +11,13 @@ Specifically, shoal learns an empirical prior on transcript-level abundances acr
 samples in an experiment, and subsequently applies a variant of the variational Bayesian 
 expectation maximization algorithm to apply this prior adaptively across multi-mapping groups 
 of reads.  
-shoal can increase quantification accuracy, inter- sample consistency, and reduce false positives in 
+
+shoal can increase quantification accuracy, inter-sample consistency, and reduce false positives in 
 downstream differential analysis when applied to multi-condition RNA-seq experiments. 
 Moreover, shoal, runs downstream of Salmon and requires less 
 than a minute per-sample to re-estimate transcript abundances while accounting for the learned empirical prior.
+
+shoal is designed and developed by [Avi Srivastava](https://github.com/k3yavi), [Michael Love](https://github.com/mikelove) and [Rob Patro](https://github.com/rob-p).
 
 ### Using shoal
 Shoal requires to have salmon output of all the samples in the experiment
