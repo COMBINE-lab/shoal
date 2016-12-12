@@ -1,3 +1,7 @@
+from __future__ import division
+from __future__ import print_function
+from builtins import range
+from past.utils import old_div
 import os
 import sys
 import pandas as pd
@@ -39,8 +43,8 @@ def computeFromBoot(sampleDirs, args):
     #        c.append(np.linalg.norm(bootstraps[:,bs] - means))
     #    print(sorted(c))
 
-    stddev = np.sqrt( np.sum(np.square(means - bootstrapMeans.T) + bootstrapVars.T, axis=0)  / len(sampleDirs) )
-    factors = np.array([np.exp(-stddev[i]/(means[i] + 1e-5)) for i in xrange(len(means))])
+    stddev = np.sqrt( old_div(np.sum(np.square(means - bootstrapMeans.T) + bootstrapVars.T, axis=0), len(sampleDirs)) )
+    factors = np.array([np.exp(old_div(-stddev[i],(means[i] + 1e-5))) for i in range(len(means))])
     names = quant.index
     d = pd.DataFrame({'Name' : names, 'mean' : means, 'stddev' : stddev, 'factor' : factors}).set_index('Name')
     return d
@@ -51,8 +55,8 @@ def normFactors(readVals):
     gmeans = scipy.stats.mstats.gmean(readVals, axis=-1)
     print(gmeans)
     sjs = []
-    for samp in xrange(readVals.shape[1]):
-        sj = readVals[:,samp] / gmeans
+    for samp in range(readVals.shape[1]):
+        sj = old_div(readVals[:,samp], gmeans)
         sj = sj[~np.isnan(sj)]
         sjs.append(np.median(sj))
     sjs = np.array(sjs)
@@ -107,7 +111,7 @@ def computeFromPointEst(sampleDirs, args):
     #    logger.info("rhos = {}".format(e))
     stddev = np.sqrt(readVals.var(axis=1))
     N = readVals.shape[1]
-    cvs = np.array([ (1 + 1/(4*N)) * (stddev[i]/(means[i] + 1e-5)) for i in xrange(len(means))])
+    cvs = np.array([ (1 + old_div(1,(4*N))) * (old_div(stddev[i],(means[i] + 1e-5))) for i in range(len(means))])
     factors = np.exp(-cvs)
     names = quant.index
     d = pd.DataFrame({'Name' : names, 'mean' : means, 'stddev' : stddev, 'factor' : factors}).set_index('Name')
