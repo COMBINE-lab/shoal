@@ -44,7 +44,7 @@ then
     print_usage_and_exit
 fi
 
-SHOALDIR="$(dirname "$0")"
+SHOALDIR="$(dirname "$(readlink -f "$0")")"
 #source files
 SHOAL_CPP="$SHOALDIR/src-cpp/shoal"
 SHOAL_PY="$SHOALDIR/src-py/shoal.py"
