@@ -1,3 +1,7 @@
+from __future__ import division
+from __future__ import print_function
+from builtins import range
+from past.utils import old_div
 from scipy.special import digamma
 #from math import exp
 import numpy as np
@@ -31,13 +35,13 @@ def dumpSFfile(outfile,
     norm = 0.0
     for index, txp in enumerate(tnames):
         if index < len(alphasList) and index < len(effLengthDict):
-            norm += alphasList[index] / effLengthDict[txp]
+            norm += old_div(alphasList[index], effLengthDict[txp])
     norm /= 10**6
     with open(outfile, 'w') as oFile:
         oFile.write("Name\tLength\tEffectiveLength\tTPM\tNumReads\n")
         for index, txp in enumerate(tnames):
             if index < len(alphasList) and index < len(effLengthDict):
-                tpm = (alphasList[index] / effLengthDict[txp]) / norm
+                tpm = old_div((old_div(alphasList[index], effLengthDict[txp])), norm)
                 oFile.write("{0}\t{1}\t{2:.2f}\t{3:.2f}\t{4:.2f}\n".format(txp, txpLengthDict[txp], effLengthDict[txp], tpm, alphasList[index]))
 
 def VBEMUpdate(alphaIn,
@@ -65,7 +69,7 @@ def VBEMUpdate(alphaIn,
     expTheta[np.isnan(expTheta)] = 0
     expTheta[np.isinf(expTheta)] = 0
 
-    for txps, count in txpGroupCounts.iteritems():
+    for txps, count in txpGroupCounts.items():
         denom = 0.0
         auxs = txpGroupCombinedWeights[txps]
 
@@ -75,7 +79,7 @@ def VBEMUpdate(alphaIn,
                 if expTheta[txp] > 0.0:
                     denom += expTheta[txp] * aux
             if denom > minEQClassWeight:
-                invDenom = count / denom
+                invDenom = old_div(count, denom)
                 for index, txp in enumerate(txps):
                     aux = auxs[index]
                     if expTheta[txp] > 0.0:
@@ -103,15 +107,15 @@ def runVBEM(alphas,
         output:
             alphas: estimated counts after VBEM optimization.
     '''
-    for k, v in txpGroupCombinedWeights.iteritems():
+    for k, v in txpGroupCombinedWeights.items():
         count = txpGroupCounts[k]
         newWeights = []
         w = 0
         for t in k:
-            w += count / effLens[t]
-        norm = 1.0 / w
+            w += old_div(count, effLens[t])
+        norm = old_div(1.0, w)
         for t in k:
-            newWeights.append((count / effLens[t]) * norm)
+            newWeights.append((old_div(count, effLens[t])) * norm)
         txpGroupCombinedWeights[k] = np.array(newWeights)
  
     converged = False
@@ -127,7 +131,7 @@ def runVBEM(alphas,
         maxRelDiff = -np.inf
         for txpId in range(len(alphas)):
             if alphasPrime[txpId] > alphaCheckCutoff:
-                relDiff = abs(alphas[txpId] - alphasPrime[txpId]) / alphasPrime[txpId]
+                relDiff = old_div(abs(alphas[txpId] - alphasPrime[txpId]), alphasPrime[txpId])
                 maxRelDiff = max(relDiff, maxRelDiff)
                 if relDiff > relDiffTolerance:
                     converged = False
