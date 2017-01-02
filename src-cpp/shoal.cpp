@@ -58,7 +58,7 @@ template <typename VecT>
 double truncateCountVector(VecT& alphas, double cutoff);
 
 Eigen::VectorXd optAdaptEst(EquivCollection& ec, spp::sparse_hash_map<std::string, QuantEntry>& quantMap,
-                              spp::sparse_hash_map<std::string, PriorEntry>& priorMap, double weight) {
+                              spp::sparse_hash_map<std::string, PriorEntry>& priorMap, double weight, std::string optBaseStr) {
     auto console = spdlog::get("console");
     size_t N = quantMap.size();
     Eigen::VectorXd prior(N);
@@ -90,8 +90,17 @@ Eigen::VectorXd optAdaptEst(EquivCollection& ec, spp::sparse_hash_map<std::strin
     console->info("num txps = {}", priorMap.size());
     Optimizer opt;
     Eigen::VectorXd alphaOptInform;
-    alphaOptInform = opt.optimize(ec, alphas, lengths, effLens, priorInform, prior, factorsInform, estCounts, OptimizationType::VBEM);
-    auto alphaOpt = opt.optimize(ec, alphas, lengths, effLens, prior, prior, factors, estCounts, OptimizationType::VBEM);
+
+    if (optBaseStr == "em"){
+	alphaOptInform = opt.optimize(ec, alphas, lengths, effLens, priorInform, prior, factorsInform, estCounts, OptimizationType::EM);
+    	auto alphaOpt = opt.optimize(ec, alphas, lengths, effLens, prior, prior, factors, estCounts, OptimizationType::EM);
+    }
+    else{
+	alphaOptInform = opt.optimize(ec, alphas, lengths, effLens, priorInform, prior, factorsInform, estCounts, OptimizationType::VBEM);
+    	auto alphaOpt = opt.optimize(ec, alphas, lengths, effLens, prior, prior, factors, estCounts, OptimizationType::VBEM);
+    }
+	
+
 
     Eigen::VectorXd merged(N);
     for (size_t i = 0; i < N; ++i) {
@@ -220,7 +229,7 @@ Eigen::VectorXd optAdaptPrior(EquivCollection& ec, spp::sparse_hash_map<std::str
 
 
 
-Eigen::VectorXd optNoPrior(EquivCollection& ec, spp::sparse_hash_map<std::string, QuantEntry>& quantMap, double weight) {
+Eigen::VectorXd optNoPrior(EquivCollection& ec, spp::sparse_hash_map<std::string, QuantEntry>& quantMap, double weight, std::string optBaseStr) {
 
     auto console = spdlog::get("console");
     size_t N = quantMap.size();
@@ -247,7 +256,13 @@ Eigen::VectorXd optNoPrior(EquivCollection& ec, spp::sparse_hash_map<std::string
 
     console->info("num txps = {}", quantMap.size());
     Optimizer opt;
-    return opt.optimize(ec, alphas, lengths, effLens, prior, prior, factors, estCounts, OptimizationType::VBEM);
+    if (optBaseStr == 'em'){
+	    return opt.optimize(ec, alphas, lengths, effLens, prior, prior, factors, estCounts, OptimizationType::EM);
+    }
+    else{
+	    return opt.optimize(ec, alphas, lengths, effLens, prior, prior, factors, estCounts, OptimizationType::VBEM);
+    }
+    
 }
 
 
@@ -259,9 +274,12 @@ int main(int argc, char* argv[]) {
   std::string sampleDir;
   std::string outFile;
   std::string optStr;
+  std::string optBaseStr;
   double weight{0.001};
 
   Switch helpOption("h", "help", "produce help message");
+  Value<std::string> optBaseType("b", "optBaseType", "The type of base level optimization to perform one of {vbem, or em}",
+                             "adapt-prior", &optStr);
   Value<std::string> optType("t", "optType", "The type of optimization to perform one of {adapt-prior, or adapt-est}",
                              "adapt-prior", &optStr);
   Value<std::string> priorOpt("p", "prior", "file containing prior", "",
@@ -275,6 +293,7 @@ int main(int argc, char* argv[]) {
   OptionParser op("Options");
   op.add(helpOption)
       .add(optType)
+      .add(optBaseType)
       .add(priorOpt)
       .add(sampleOpt)
       .add(outOpt)
@@ -293,6 +312,12 @@ int main(int argc, char* argv[]) {
     std::unordered_set<std::string> validOptTypes = {"adapt-prior", "adapt-est"};
     if (validOptTypes.find(optStr) == validOptTypes.end()) {
         console->critical("Do not recognize optType {}!", optStr);
+        std::exit(1);
+    }
+	 
+    std::unordered_set<std::string> validOptBaseTypes = {"em", "vbem"};
+    if (validOptBaseTypes.find(optStr) == validOptBaseTypes.end()) {
+        console->critical("Do not recognize optType {}!", optBaseStr);
         std::exit(1);
     }
 
@@ -366,12 +391,12 @@ int main(int argc, char* argv[]) {
     Eigen::VectorXd merged;
     if (havePrior) {
         if (optStr == "adapt-prior") {
-            merged = optAdaptPrior(ec, quantMap, priorMap, weight);
+            merged = optAdaptPrior(ec, quantMap, priorMap, weight, optBaseStr);
         } else if (optStr == "adapt-est") {
-            merged = optAdaptEst(ec, quantMap, priorMap, weight);
+            merged = optAdaptEst(ec, quantMap, priorMap, weight, optBaseStr);
         }
     } else {
-        merged = optNoPrior(ec, quantMap, weight);
+        merged = optNoPrior(ec, quantMap, weight, optBaseStr);
     }
 
     writeSFFile(outFile, ec.tnames_, merged, lengths, effLens);
