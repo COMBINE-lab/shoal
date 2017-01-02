@@ -126,4 +126,4 @@ python "$SHOAL_PY" create-prior \
   --basepath "$BASEPATH" \
   --outdir "$PRIOR"
 
-parallel -j "$CONCURRENCY_LEVEL" "$SHOAL_CPP -p $PRIOR/prior.tsv -s {} -o $OUT{/}_adapt.sf -t adapt-prior -b em" ::: ${QUANTDIRS[*]}
+parallel -j "$CONCURRENCY_LEVEL" "$SHOAL_CPP -p $PRIOR/prior.tsv -s {} -o $OUT{/}_adapt.sf -t adapt-prior" ::: ${QUANTDIRS[*]}
