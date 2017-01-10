@@ -173,7 +173,7 @@ void EMAdaptUpdateTest_(std::vector<std::vector<uint32_t>>& txpGroupLabels,
         for (size_t i = 0; i < groupSize; ++i) {
           auto tid = txps[i];
           auto aux = auxs[i];
-          double v = aux * (alphaIn[tid] + (winfo*priorAlphas[tid] + wflat*flatPriorAlphas[tid]));
+          double v = aux * (winfo*(alphaIn[tid]+priorAlphas[tid]) + wflat*(alphaIn[tid]+flatPriorAlphas[tid]));
           if (!std::isnan(v)) {
             alphaOut[tid] += v * invDenom;
           }
