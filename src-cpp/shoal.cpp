@@ -110,7 +110,8 @@ Eigen::VectorXd optAdaptEst(EquivCollection& ec, spp::sparse_hash_map<std::strin
 
 
 Eigen::VectorXd optAdaptPrior(EquivCollection& ec, spp::sparse_hash_map<std::string, QuantEntry>& quantMap,
-                              spp::sparse_hash_map<std::string, PriorEntry>& priorMap, double weight) {
+                              spp::sparse_hash_map<std::string, PriorEntry>& priorMap, double weight, 
+			      std::string optBaseStr) {
 
     auto console = spdlog::get("console");
     size_t N = quantMap.size();
@@ -207,7 +208,13 @@ Eigen::VectorXd optAdaptPrior(EquivCollection& ec, spp::sparse_hash_map<std::str
     }
 
     Optimizer opt;
-    auto alphaOpt = opt.optimize(ec, alphas, lengths, effLens, prior, flatPrior, factors, estCounts, OptimizationType::VBEM_ADAPTIVE);
+    if (optBaseStr == "em"){
+	    return opt.optimize(ec, alphas, lengths, effLens, prior, flatPrior, factors, estCounts, OptimizationType::EM_ADAPTIVE);
+    }
+    else{
+	    return opt.optimize(ec, alphas, lengths, effLens, prior, flatPrior, factors, estCounts, OptimizationType::VBEM_ADAPTIVE);
+    }
+    
     /*
     i = 0;
     for (auto& tname : ec.tnames_) {
@@ -218,7 +225,7 @@ Eigen::VectorXd optAdaptPrior(EquivCollection& ec, spp::sparse_hash_map<std::str
         ++i;
     }
     */
-    return alphaOpt;
+    //return alphaOpt;
 }
 
 
@@ -385,7 +392,7 @@ int main(int argc, char* argv[]) {
     Eigen::VectorXd merged;
     if (havePrior) {
         if (optStr == "adapt-prior") {
-            merged = optAdaptPrior(ec, quantMap, priorMap, weight);
+            merged = optAdaptPrior(ec, quantMap, priorMap, weight, optBaseStr);
         } else if (optStr == "adapt-est") {
             merged = optAdaptEst(ec, quantMap, priorMap, weight);
         }
