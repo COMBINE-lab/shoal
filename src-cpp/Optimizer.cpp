@@ -156,11 +156,12 @@ void EMAdaptUpdateTest_(std::vector<std::vector<uint32_t>>& txpGroupLabels,
 	  } 
       }
 	    
+      double wflat = 1.0 - minFactor;
+      double winfo = minFactor;
+	    
       for (size_t i = 0; i < groupSize; ++i) {
         auto tid = txps[i];
         auto aux = auxs[i];
-	double wflat = 1.0 - minFactor;
-      	double winfo = minFactor;
         double v = aux * (alphaIn[tid] + (winfo*priorAlphas[tid] + wflat*flatPriorAlphas[tid]));
         denom += v;
       }
