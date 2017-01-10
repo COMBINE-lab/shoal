@@ -8,7 +8,8 @@
 enum class OptimizationType : uint8_t {
     EM = 0,
     VBEM = 1,
-    VBEM_ADAPTIVE = 2
+    VBEM_ADAPTIVE = 2,
+    EM_ADAPTIVE = 3
 };
 
 class Optimizer {
