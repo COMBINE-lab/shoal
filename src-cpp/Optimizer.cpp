@@ -128,7 +128,8 @@ template <typename VecT>
 void EMAdaptUpdateTest_(std::vector<std::vector<uint32_t>>& txpGroupLabels,
                std::vector<std::vector<double>>& txpGroupCombinedWeights,
                std::vector<uint64_t>& txpGroupCounts, const VecT& priorAlphas,
-		const VecT& alphaIn, VecT& alphaOut) {
+	       const VecT& flatPriorAlphas, const VecT& factors, 
+	       const VecT& alphaIn, VecT& alphaOut) {
 
   size_t N = alphaIn.size();
   assert(alphaIn.size() == alphaOut.size());
@@ -146,10 +147,21 @@ void EMAdaptUpdateTest_(std::vector<std::vector<uint32_t>>& txpGroupLabels,
     // then it gets the full count.  Otherwise,
     // update according to our VBEM rule.
     if (groupSize > 1) {
+      double minFactor{1.0};
+      for (size_t i = 0; i < groupSize; ++i) {
+          auto tid = txps[i];
+          
+          if (factors[tid] < minFactor) {
+              minFactor = factors[tid];
+	  } 
+      }
+	    
       for (size_t i = 0; i < groupSize; ++i) {
         auto tid = txps[i];
         auto aux = auxs[i];
-        double v = (alphaIn[tid]+priorAlphas[tid]) * aux;
+	double wflat = 1.0 - minFactor;
+      	double winfo = minFactor;
+        double v = aux * (alphaIn[tid] + (winfo*priorAlphas[tid] + wflat*flatPriorAlphas[tid]));
         denom += v;
       }
 
@@ -160,7 +172,7 @@ void EMAdaptUpdateTest_(std::vector<std::vector<uint32_t>>& txpGroupLabels,
         for (size_t i = 0; i < groupSize; ++i) {
           auto tid = txps[i];
           auto aux = auxs[i];
-          double v = (alphaIn[tid]+priorAlphas[tid]) * aux;
+          double v = aux * (alphaIn[tid] + (winfo*priorAlphas[tid] + wflat*flatPriorAlphas[tid]));
           if (!std::isnan(v)) {
             alphaOut[tid] += v * invDenom;
           }
@@ -571,7 +583,7 @@ Optimizer::optimize(EquivCollection& eqc, Eigen::VectorXd& alphas,
               break;
 	  case OptimizationType::EM_ADAPTIVE:
 	      EMAdaptUpdateTest_(eqc.labels_, eqc.auxProbs_, eqc.counts_, priorAlphas, 
-				 alphas, alphasPrime);
+				 flatPriorAlphas, factors, alphas, alphasPrime);
 	      break;
           case OptimizationType::VBEM_ADAPTIVE:
               VBEMUpdateAdaptive_(eqc.labels_, eqc.auxProbs_, eqc.counts_, priorAlphas,
