@@ -110,7 +110,7 @@ Eigen::VectorXd optAdaptEst(EquivCollection& ec, spp::sparse_hash_map<std::strin
 
 
 Eigen::VectorXd optAdaptPrior(EquivCollection& ec, spp::sparse_hash_map<std::string, QuantEntry>& quantMap,
-                              spp::sparse_hash_map<std::string, PriorEntry>& priorMap, double weight, 
+                              spp::sparse_hash_map<std::string, PriorEntry>& priorMap, double weight,
 			      std::string optBaseStr) {
 
     auto console = spdlog::get("console");
@@ -190,7 +190,7 @@ Eigen::VectorXd optAdaptPrior(EquivCollection& ec, spp::sparse_hash_map<std::str
 
     console->info("flatSum = {}, infoSum = {}, ratio = {}", flatSum, infoSum, flatSum / infoSum);
     console->info("num txps = {}", priorMap.size());
-    auto autoWeight = 0.15 * (flatSum / infoSum);
+    auto autoWeight = 0.05 * (flatSum / infoSum);
     //autoWeight = (flatSum / infoSum);
     //autoWeight = 1.0;//mf / mi;
 
@@ -214,7 +214,7 @@ Eigen::VectorXd optAdaptPrior(EquivCollection& ec, spp::sparse_hash_map<std::str
     else{
 	    return opt.optimize(ec, alphas, lengths, effLens, prior, flatPrior, factors, estCounts, OptimizationType::VBEM_ADAPTIVE);
     }
-    
+
     /*
     i = 0;
     for (auto& tname : ec.tnames_) {
