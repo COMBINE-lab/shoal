@@ -569,6 +569,10 @@ Optimizer::optimize(EquivCollection& eqc, Eigen::VectorXd& alphas,
               VBEMUpdate_(eqc.labels_, eqc.auxProbs_, eqc.counts_, priorAlphas,
                           flatPriorAlphas, alphas, alphasPrime, expTheta, factors);
               break;
+	  case OptimizationType::EM_ADAPTIVE:
+	      EMAdaptUpdateTest_(eqc.labels_, eqc.auxProbs_, eqc.counts_, priorAlphas, 
+				 alphas, alphasPrime);
+	      break;
           case OptimizationType::VBEM_ADAPTIVE:
               VBEMUpdateAdaptive_(eqc.labels_, eqc.auxProbs_, eqc.counts_, priorAlphas,
                                 flatPriorAlphas, alphas, alphasFlat, alphasPrime, expTheta, factors, itNum);
