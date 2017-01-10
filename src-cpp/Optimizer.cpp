@@ -121,6 +121,59 @@ void EMUpdate_(std::vector<std::vector<uint32_t>>& txpGroupLabels,
   }
 }
 
+/**
+ * Single-threaded EM-update routine for use in bootstrapping
+ */
+template <typename VecT>
+void EMAdaptUpdateTest_(std::vector<std::vector<uint32_t>>& txpGroupLabels,
+               std::vector<std::vector<double>>& txpGroupCombinedWeights,
+               std::vector<uint64_t>& txpGroupCounts, const VecT& priorAlphas,
+		const VecT& alphaIn, VecT& alphaOut) {
+
+  size_t N = alphaIn.size();
+  assert(alphaIn.size() == alphaOut.size());
+
+  size_t numEqClasses = txpGroupLabels.size();
+  for (size_t eqID = 0; eqID < numEqClasses; ++eqID) {
+    uint64_t count = txpGroupCounts[eqID];
+    // for each transcript in this class
+    const std::vector<uint32_t>& txps = txpGroupLabels[eqID];
+    const auto& auxs = txpGroupCombinedWeights[eqID];
+
+    double denom = 0.0;
+    size_t groupSize = txps.size();
+    // If this is a single-transcript group,
+    // then it gets the full count.  Otherwise,
+    // update according to our VBEM rule.
+    if (groupSize > 1) {
+      for (size_t i = 0; i < groupSize; ++i) {
+        auto tid = txps[i];
+        auto aux = auxs[i];
+        double v = (alphaIn[tid]+priorAlphas[tid]) * aux;
+        denom += v;
+      }
+
+      if (denom <= ::minEQClassWeight) {
+        // tgroup.setValid(false);
+      } else {
+        double invDenom = count / denom;
+        for (size_t i = 0; i < groupSize; ++i) {
+          auto tid = txps[i];
+          auto aux = auxs[i];
+          double v = (alphaIn[tid]+priorAlphas[tid]) * aux;
+          if (!std::isnan(v)) {
+            alphaOut[tid] += v * invDenom;
+          }
+        }
+      }
+    } else {
+      alphaOut[txps.front()] += count;
+    }
+  }
+}
+
+
+
 /*
 void FixCounts_(
                  std::vector<std::vector<uint32_t>>& txpGroupLabels,
