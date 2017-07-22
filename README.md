@@ -66,6 +66,17 @@ Specifically, a command like `./run_shoal -q exp_quants -o exp_shoal_quants` wou
 <output_directoty>/<sample_name>_adapt.sf
 ```
 
+### Compilation Error
+```
+readlink: illegal option -- f
+usage: readlink [-n] [file ...]
+```
+install coreutils for `greadlink` command
+```
+brew install coreutils
+```
+
+
 Footnotes:
 ----------
 <b id="f1">1</b> This image is from [the wikipedia artical on shoaling](https://en.wikipedia.org/wiki/Shoaling_and_schooling#/media/File:School_jacks_klein.JPG). It is licensed under CC-BY-SA.[↩](#a1)
