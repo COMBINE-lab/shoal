@@ -31,4 +31,9 @@ public:
 			   uint32_t maxIter = 1000);
 };
 
+void EMUpdate_(std::vector<std::vector<uint32_t>>& txpGroupLabels,
+               std::vector<std::vector<double>>& txpGroupCombinedWeights,
+               std::vector<uint64_t>& txpGroupCounts, const VecT& alphaIn,
+               VecT& alphaOut);
+
 #endif // _OPTIMIZER_HPP
