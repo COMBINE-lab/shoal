@@ -51,7 +51,7 @@ void writeSFFile(std::string fname, std::vector<std::string>& names,
 template <typename VecT>
 void EMUpdate_(std::vector<std::vector<uint32_t>>& txpGroupLabels,
                std::vector<std::vector<double>>& txpGroupCombinedWeights,
-               std::vector<uint64_t>& txpGroupCounts, const VecT& alphaIn,
+               std::vector<size_t>& txpGroupCounts, const VecT& alphaIn,
                VecT& alphaOut);
 
 template <typename VecT>

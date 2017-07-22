@@ -44,7 +44,7 @@ then
     print_usage_and_exit
 fi
 
-SHOALDIR="$(dirname "$(readlink -f "$0")")"
+SHOALDIR="$(dirname "$(greadlink -f "$0")")"
 #source files
 SHOAL_CPP="$SHOALDIR/src-cpp/shoal"
 SHOAL_PY="$SHOALDIR/src-py/shoal.py"
@@ -115,7 +115,7 @@ then
 fi
 
 # Canonicalize the output directory
-OUT="$(readlink -m "$OUT")/"
+OUT="$(greadlink -m "$OUT")/"
 
 #prior file path
 PRIOR="$OUT/prior/"

@@ -76,7 +76,7 @@ std::vector<double> populatePriorAlphas_(
 template <typename VecT>
 void EMUpdate_(std::vector<std::vector<uint32_t>>& txpGroupLabels,
                std::vector<std::vector<double>>& txpGroupCombinedWeights,
-               std::vector<uint64_t>& txpGroupCounts, const VecT& alphaIn,
+               std::vector<size_t>& txpGroupCounts, const VecT& alphaIn,
                VecT& alphaOut) {
 
   size_t N = alphaIn.size();
@@ -177,7 +177,7 @@ template <typename VecT>
 void VBEMUpdate_(
     const std::vector<std::vector<uint32_t>>& txpGroupLabels,
     const std::vector<std::vector<double>>& txpGroupCombinedWeights,
-    const std::vector<uint64_t>& txpGroupCounts, const VecT& priorAlphas,
+    const std::vector<size_t>& txpGroupCounts, const VecT& priorAlphas,
     const VecT& flatPriorAlphas, const VecT& alphaIn, VecT& alphaOut,
     VecT& expTheta, const VecT& factors) {
 
@@ -254,14 +254,14 @@ template <typename VecT>
 void EMUpdateAdaptive_(
                          const std::vector<std::vector<uint32_t>>& txpGroupLabels,
                          const std::vector<std::vector<double>>& txpGroupCombinedWeights,
-                         const std::vector<uint64_t>& txpGroupCounts, 
+                         const std::vector<size_t>& txpGroupCounts,
                          const VecT& priorAlphas,
-                         const VecT& flatPriorAlphas, 
-                         const VecT& alphaIn, 
-                         const VecT& alphaFlat, 
+                         const VecT& flatPriorAlphas,
+                         const VecT& alphaIn,
+                         const VecT& alphaFlat,
 			 //const VecT& effLens,
                          VecT& alphaOut,
-                         VecT& expTheta, 
+                         VecT& expTheta,
                          const VecT& factors,
                          const size_t itNum) {
     size_t N = alphaIn.size();
@@ -272,7 +272,7 @@ void EMUpdateAdaptive_(
     double decay = std::exp(-static_cast<double>(itNum));
     //auto thetas = alphaIn / effLens;
     //thetas /= thetas.sum();
-    
+
 for (size_t eqID = 0; eqID < numEQClasses; ++eqID) {
     uint64_t count = txpGroupCounts[eqID];
     const std::vector<uint32_t>& txps = txpGroupLabels[eqID];
@@ -296,13 +296,13 @@ for (size_t eqID = 0; eqID < numEQClasses; ++eqID) {
           atot += alphaIn[tid];
           if (factors[tid] < minFactor) {
               minFactor = factors[tid];
-          } 
+          }
           //minFactor += factors[tid];
       }
       //minFactor /= groupSize;
 
       //std::cerr << "local weight flat = " << localWeightFlat << ", local weight info = " << localWeightInfo << "\n";
-      double lwFlat = decay;//0.05 * (atot / localWeightFlat); 
+      double lwFlat = decay;//0.05 * (atot / localWeightFlat);
       double localWeight = (decay*localWeightFlat) / localWeightInfo;
 
       for (size_t i = 0; i < groupSize; ++i) {
@@ -313,7 +313,7 @@ for (size_t eqID = 0; eqID < numEQClasses; ++eqID) {
           expThetaFlat[tid] = apFlat;//(invFlat > 0.0) ? (apFlat * invFlat) : 0.0;
           expTheta[tid] = apInfo;//(invInfo > 0.0) ? (apInfo * invInfo) : 0.0;
       }
-      
+
       for (size_t i = 0; i < groupSize; ++i) {
         auto tid = txps[i];
         auto aux = auxs[i];
@@ -353,13 +353,13 @@ template <typename VecT>
 void VBEMUpdateAdaptive_(
     const std::vector<std::vector<uint32_t>>& txpGroupLabels,
     const std::vector<std::vector<double>>& txpGroupCombinedWeights,
-    const std::vector<uint64_t>& txpGroupCounts, 
+    const std::vector<size_t>& txpGroupCounts,
     const VecT& priorAlphas,
-    const VecT& flatPriorAlphas, 
-    const VecT& alphaIn, 
-    const VecT& alphaFlat, 
+    const VecT& flatPriorAlphas,
+    const VecT& alphaIn,
+    const VecT& alphaFlat,
     VecT& alphaOut,
-    VecT& expTheta, 
+    VecT& expTheta,
     const VecT& factors,
     const size_t itNum) {
 
@@ -389,7 +389,7 @@ void VBEMUpdateAdaptive_(
     double apFlat = 0.0;
     double apInfo = 0.0;
     apInfo = alphaIn[i] + decay * priorAlphas[i];
-    apFlat = alphaIn[i] + decay * flatPriorAlphas[i]; 
+    apFlat = alphaIn[i] + decay * flatPriorAlphas[i];
 
     if (apInfo > ::digammaMin) {
       expTheta[i] = std::exp(digamma(apInfo, &ifault) - logNorm);
@@ -412,7 +412,7 @@ void VBEMUpdateAdaptive_(
       expThetaFlat[i] = 0.0;
     }
     //}
-    
+
     alphaOut[i] = 0.0;
   }
 
@@ -430,11 +430,11 @@ void VBEMUpdateAdaptive_(
       double minFactor{1.0};
       for (size_t i = 0; i < groupSize; ++i) {
           auto tid = txps[i];
-          
+
           if (factors[tid] < minFactor) {
               minFactor = factors[tid];
 	  }
-          
+
       }
       double wflat = 1.0 - minFactor;
       double winfo = minFactor;
@@ -472,7 +472,7 @@ Optimizer::Optimizer() {}
 Eigen::VectorXd
 Optimizer::optimize(EquivCollection& eqc, Eigen::VectorXd& alphas,
                     Eigen::VectorXd& lengths,
-                    Eigen::VectorXd& effLens, 
+                    Eigen::VectorXd& effLens,
                     Eigen::VectorXd& priorAlphas,
                     Eigen::VectorXd& flatPriorAlphas,
                     Eigen::VectorXd& factors, Eigen::VectorXd& alphasFlat, OptimizationType ot,
@@ -492,7 +492,7 @@ Optimizer::optimize(EquivCollection& eqc, Eigen::VectorXd& alphas,
 
   bool useVBEM{true};
   bool perTranscriptPrior{false};
-  
+
   // auto jointLog = sopt.jointLog;
   // auto& fragStartDists = readExp.fragmentStartPositionDistributions();
   double totalNumFrags = alphas.sum();
@@ -596,7 +596,7 @@ Optimizer::optimize(EquivCollection& eqc, Eigen::VectorXd& alphas,
 template
 void EMUpdate_<Eigen::VectorXd>(std::vector<std::vector<uint32_t>>& txpGroupLabels,
                                 std::vector<std::vector<double>>& txpGroupCombinedWeights,
-                                std::vector<uint64_t>& txpGroupCounts, const Eigen::VectorXd& alphaIn,
+                                std::vector<size_t>& txpGroupCounts, const Eigen::VectorXd& alphaIn,
                                 Eigen::VectorXd& alphaOut);
-template 
+template
 double truncateCountVector<Eigen::VectorXd>(Eigen::VectorXd& alphas, double cutoff);

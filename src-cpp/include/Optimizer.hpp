@@ -3,7 +3,7 @@
 
 #include "eigen3/Eigen/Dense"
 #include "EquivCollection.hpp"
-#include <vector> 
+#include <vector>
 
 enum class OptimizationType : uint8_t {
     EM = 0,
@@ -30,10 +30,5 @@ public:
 			   double tolerance = 0.01,
 			   uint32_t maxIter = 1000);
 };
-
-void EMUpdate_(std::vector<std::vector<uint32_t>>& txpGroupLabels,
-               std::vector<std::vector<double>>& txpGroupCombinedWeights,
-               std::vector<uint64_t>& txpGroupCounts, const VecT& alphaIn,
-               VecT& alphaOut);
 
 #endif // _OPTIMIZER_HPP
